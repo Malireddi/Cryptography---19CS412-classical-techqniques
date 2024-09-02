@@ -32,49 +32,107 @@ Implementation using C or pyhton code
 ## PROGRAM:
 PROGRAM:
 CaearCipher.
+PROGRAM:
+```
+Caesar Cipher Encryption Code:
 #include <stdio.h>
-#include <stdlib.h>
- 
-// Function to perform Caesar Cipher encryption void caesarEncrypt(char *text, int key) {
-   for (int i = 0; text[i] != '\0'; i++) { char c = text[i];
-// Check if the character is an uppercase letter 
-    if (c >= 'A' && c <= 'Z') {
-    text[i] = ((c - 'A' + key) % 26 + 26) % 26 + 'A';
-    }
-// Check if the character is a lowercase letter
-    else if (c >= 'a' && c <= 'z') {
-        text[i] = ((c - 'a' + key) % 26 + 26) % 26 + 'a';
-    }
-// Ignore non-alphabetic characters
-    }
-}
 
-// Function to perform Caesar Cipher decryption 
-void caesarDecrypt(char *text, int key) {
-// Decryption is the same as encryption with a negative key 
-caesarEncrypt(text, -key);
+void encrypt(char text[], int shift) {
+    char ch;
+    for (int i = 0; text[i] != '\0'; ++i) {
+        ch = text[i];
+        
+        if (ch >= 'a' && ch <= 'z') {
+            ch = ch + shift;
+
+            if (ch > 'z') {
+                ch = ch - 'z' + 'a' - 1;
+            }
+
+            text[i] = ch;
+        } else if (ch >= 'A' && ch <= 'Z') {
+            ch = ch + shift;
+
+            if (ch > 'Z') {
+                ch = ch - 'Z' + 'A' - 1;
+            }
+
+            text[i] = ch;
+        }
+    }
 }
 
 int main() {
-char message[100]; // Declare a character array to store the message int key;
+    char text[100];
+    int shift;
 
-printf("Enter the message to encrypt: ");
-fgets(message, sizeof(message), stdin); // Read input from the user printf("Enter the Caesar Cipher key (an integer): ");
-scanf("%d", &key); // Read the key from the user
-// Encrypt the message using the Caesar Cipher caesarEncrypt(message, key); printf("Encrypted Message: %s", message);
-// Decrypt the message back to the original
- 
-caesarDecrypt(message, key); printf("Decrypted Message: %s", message); return 0;
+    printf("Enter a message to encrypt: ");
+    gets(text);
+
+    printf("Enter shift amount: ");
+    scanf("%d", &shift);
+
+    encrypt(text, shift);
+
+    printf("Encrypted message: %s\n", text);
+
+    return 0;
+}
+Caesar Cipher Decryption Code
+#include <stdio.h>
+
+void decrypt(char text[], int shift) {
+    char ch;
+    for (int i = 0; text[i] != '\0'; ++i) {
+        ch = text[i];
+        
+        if (ch >= 'a' && ch <= 'z') {
+            ch = ch - shift;
+
+            if (ch < 'a') {
+                ch = ch + 'z' - 'a' + 1;
+            }
+
+            text[i] = ch;
+        } else if (ch >= 'A' && ch <= 'Z') {
+            ch = ch - shift;
+
+            if (ch < 'A') {
+                ch = ch + 'Z' - 'A' + 1;
+            }
+
+            text[i] = ch;
+        }
+    }
 }
 
+int main() {
+    char text[100];
+    int shift;
+
+    printf("Enter a message to decrypt: ");
+    gets(text);
+
+    printf("Enter shift amount: ");
+    scanf("%d", &shift);
+
+    decrypt(text, shift);
+
+    printf("Decrypted message: %s\n", text);
+
+    return 0;
+}
+```
 
 ## OUTPUT:
 OUTPUT:
 Simulating Caesar Cipher
 
+![Screenshot 2024-09-02 134434](https://github.com/user-attachments/assets/2fe2e29c-bde9-4945-b0bb-886a8af882bf)
 
-Input : Anna University
-Encrypted Message : Dqqd Xqlyhuvlwb Decrypted Message : Anna University
+![image](https://github.com/user-attachments/assets/0d043a8b-5a0e-4c43-ab0f-7d244d8aa1ff)
+
+
 
 ## RESULT:
 The program is executed successfully
@@ -119,165 +177,145 @@ To decrypt, use the INVERSE (opposite) of the last 3 rules, and the 1st as-is (d
 
 
 ## PROGRAM:
+```
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#define SIZE 30
+#include <ctype.h>
 
-// Function to convert the string to lowercase void toLowerCase(char plain[], int ps)
-{
-int i;
-for (i = 0; i < ps; i++) {
-if (plain[i] > 64 && plain[i] < 91)
- 
-plain[i] += 32;
-}
-}
+#define SIZE 5
 
-// Function to remove all spaces in a string 
-int removeSpaces(char* plain, int ps)
-{
-int i, count = 0;
-for (i = 0; i < ps; i++)
-if (plain[i] != ' ')
-plain[count++] = plain[i];
-plain[count] = '\0'; return count;
-}
+void generateKeyTable(char key[], char keyTable[SIZE][SIZE]) {
+    int dicty[26] = {0};
+    int i, j, k = 0, len = strlen(key);
 
-// Function to generate the 5x5 key square
-void generateKeyTable(char key[], int ks, char keyT[5][5])
-{
-int i, j, k, flag = 0, *dicty;
 
-// a 26 character hashmap
-// to store count of the alphabet dicty = (int*)calloc(26, sizeof(int)); for (i = 0; i < ks; i++) {
-if (key[i] != 'j')
-dicty[key[i] - 97] = 2;
+    for (i = 0; i < len; i++) {
+        if (key[i] != 'j' && dicty[key[i] - 'a'] == 0) {
+            keyTable[k / SIZE][k % SIZE] = key[i];
+            dicty[key[i] - 'a'] = 1;
+            k++;
+        }
+    }
+
+
+    for (i = 0; i < 26; i++) {
+        if (i != 9 && dicty[i] == 0) { // skip 'j'
+            keyTable[k / SIZE][k % SIZE] = (char)(i + 'a');
+            k++;
+        }
+    }
 }
 
-dicty['j' - 97] = 1;
+void prepareText(char text[], char preparedText[]) {
+    int i, j = 0, len = strlen(text);
 
-i = 0;
-j = 0;
-for (k = 0; k < ks; k++) {
-if (dicty[key[k] - 97] == 2) {
-dicty[key[k] - 97] -= 1;
-keyT[i][j] = key[k]; j++;
-if (j == 5) {
-i++; j = 0;
-}
-}
-}
+    for (i = 0; i < len; i++) {
+        text[i] = tolower(text[i]);
+        if (text[i] == 'j') {
+            text[i] = 'i';
+        }
+    }
 
-for (k = 0; k < 26; k++) {
-if (dicty[k] == 0) {
-keyT[i][j] = (char)(k + 97);
- 
-j++;
-if (j == 5) {
-i++; j = 0;
-}
-}
-}
-}
-// Function to search for the characters of a digraph
-// in the key square and return their position
-void search(char keyT[5][5], char a, char b, int arr[])
-{
-int i, j;
+    for (i = 0; i < len; i++) {
+        if (isalpha(text[i])) {
+            preparedText[j++] = text[i];
+        }
+    }
 
-if (a == 'j')
-a = 'i'; else if (b == 'j')
-b = 'i';
-for (i = 0; i < 5; i++) {
+    preparedText[j] = '\0';
 
-for (j = 0; j < 5; j++) {
 
-if (keyT[i][j] == a) {
-arr[0] = i;
-arr[1] = j;
-}
-else if (keyT[i][j] == b) {
-arr[2] = i;
-arr[3] = j;
-}
-}
-}
+    for (i = 0; i < j; i += 2) {
+        if (preparedText[i] == preparedText[i + 1]) {
+            memmove(preparedText + i + 2, preparedText + i + 1, j - i + 1);
+            preparedText[i + 1] = 'x';
+            j++;
+        }
+    }
+
+    if (strlen(preparedText) % 2 != 0) {
+        preparedText[j++] = 'x';
+        preparedText[j] = '\0';
+    }
 }
 
-// Function to find the modulus with 5 int mod5(int a)
-{
-return (a % 5);
+void searchPosition(char keyTable[SIZE][SIZE], char a, char b, int pos[]) {
+    int i, j;
+
+    if (a == 'j') a = 'i';
+    if (b == 'j') b = 'i';
+
+    for (i = 0; i < SIZE; i++) {
+        for (j = 0; j < SIZE; j++) {
+            if (keyTable[i][j] == a) {
+                pos[0] = i;
+                pos[1] = j;
+            }
+            if (keyTable[i][j] == b) {
+                pos[2] = i;
+                pos[3] = j;
+            }
+        }
+    }
 }
 
-// Function to make the plain text length to be even int prepare(char str[], int ptrs)
-{
-if (ptrs % 2 != 0) {
-str[ptrs++] = 'z';
-str[ptrs] = '\0';
- 
-}
-return ptrs;
-}
+void encryptOrDecrypt(char text[], char keyTable[SIZE][SIZE], int mode) {
+    int i, pos[4], len = strlen(text);
 
-// Function for performing the encryption
-void encrypt(char str[], char keyT[5][5], int ps)
-{
-int i, a[4];
+    for (i = 0; i < len; i += 2) {
+        searchPosition(keyTable, text[i], text[i + 1], pos);
 
-for (i = 0; i < ps; i += 2) {
-search(keyT, str[i], str[i + 1], a); if (a[0] == a[2]) {
-str[i] = keyT[a[0]][mod5(a[1] + 1)];
-str[i + 1] = keyT[a[0]][mod5(a[3] + 1)];
-}
-else if (a[1] == a[3]) {
-str[i] = keyT[mod5(a[0] + 1)][a[1]];
-str[i + 1] = keyT[mod5(a[2] + 1)][a[1]];
- 
-}
-else {
-
-}
-}
-}
- 
-
-str[i] = keyT[a[0]][a[3]];
-str[i + 1] = keyT[a[2]][a[1]];
- 
-
-// Function to encrypt using Playfair Cipher
-void encryptByPlayfairCipher(char str[], char key[])
-{
-char ps, ks, keyT[5][5];
-
-// Key
-ks = strlen(key);
-ks = removeSpaces(key, ks); toLowerCase(key, ks);
-
-// Plaintext
-ps = strlen(str); toLowerCase(str, ps);
-ps = removeSpaces(str, ps); ps = prepare(str, ps);
-generateKeyTable(key, ks, keyT); encrypt(str, keyT, ps);
- 
-}
-// Driver code int main()
-{
-char str[SIZE], key[SIZE];
-
-// Key to be encrypted strcpy(key, "Monarchy"); printf("Key text: %s\n", key);
-
-// Plaintext to be encrypted strcpy(str, "instruments"); printf("Plain text: %s\n", str);
-
-// encrypt using Playfair Cipher encryptByPlayfairCipher(str, key);
-printf("Cipher text: %s\n", str);
-
-return 0;
+        if (pos[0] == pos[2]) {
+            text[i] = keyTable[pos[0]][(pos[1] + mode + SIZE) % SIZE];
+            text[i + 1] = keyTable[pos[2]][(pos[3] + mode + SIZE) % SIZE];
+        } else if (pos[1] == pos[3]) {
+            text[i] = keyTable[(pos[0] + mode + SIZE) % SIZE][pos[1]];
+            text[i + 1] = keyTable[(pos[2] + mode + SIZE) % SIZE][pos[3]];
+        } else {
+            text[i] = keyTable[pos[0]][pos[3]];
+            text[i + 1] = keyTable[pos[2]][pos[1]];
+        }
+    }
 }
 
+int main() {
+    char key[30], text[100], preparedText[100], keyTable[SIZE][SIZE];
+    int choice;
+
+    printf("Enter the key: ");
+    gets(key);
+
+    generateKeyTable(key, keyTable);
+
+    printf("Enter the text: ");
+    gets(text);
+
+    prepareText(text, preparedText);
+
+    printf("Enter 1 to encrypt or 2 to decrypt: ");
+    scanf("%d", &choice);
+
+    if (choice == 1) {
+        encryptOrDecrypt(preparedText, keyTable, 1);  
+        printf("Encrypted text: %s\n", preparedText);
+    } else if (choice == 2) {
+        encryptOrDecrypt(preparedText, keyTable, -1); 
+        printf("Decrypted text: %s\n", preparedText);
+    } else {
+        printf("Invalid choice!\n");
+    }
+
+    return 0;
+}
+```
 ## OUTPUT:
 Output:
-Key text: Monarchy Plain text: instruments Cipher text: gatlmzclrqtx
+
+![Screenshot 2024-09-02 140052](https://github.com/user-attachments/assets/34adeb93-779c-4bbc-b31e-f2251222e45a)
+
+![image](https://github.com/user-attachments/assets/7dd612a0-04eb-4019-b02c-5268845023a1)
+
+
 
 ## RESULT:
 The program is executed successfully
@@ -313,59 +351,183 @@ The cipher can, be adapted to an alphabet with any number of letters. All arithm
 
 ## PROGRAM:
 PROGRAM:
-#include <stdio.h> #include <string.h>
-int keymat[3][3] = { { 1, 2, 1 }, { 2, 3, 2 }, { 2, 2, 1 } };
-int invkeymat[3][3] = { { -1, 0, 1 }, { 2, -1, 0 }, { -2, 2, -1 } }; char key[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-char encode(char a, char b, char c) { char ret[4];
-int x, y, z;
-int posa = (int) a - 65; int posb = (int) b - 65; int posc = (int) c - 65;
-x = posa * keymat[0][0] + posb * keymat[1][0] + posc * keymat[2][0];
-y = posa * keymat[0][1] + posb * keymat[1][1] + posc * keymat[2][1];
-z = posa * keymat[0][2] + posb * keymat[1][2] + posc * keymat[2][2]; ret[0] = key[x % 26];
-ret[1] = key[y % 26]; ret[2] = key[z % 26]; ret[3] = '\0';
-return ret;
+```
+#include <stdio.h>
+#include <string.h>
+
+#define MATRIX_SIZE 3
+
+void getKeyMatrix(char key[], int keyMatrix[MATRIX_SIZE][MATRIX_SIZE]) {
+    int k = 0;
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            keyMatrix[i][j] = (key[k]) % 65; // 'A' -> 0, 'B' -> 1, ...
+            k++;
+        }
+    }
 }
-char decode(char a, char b, char c) { char ret[4];
-int x, y, z;
-int posa = (int) a - 65; int posb = (int) b - 65; int posc = (int) c - 65;
- 
-x = posa * invkeymat[0][0] + posb * invkeymat[1][0] + posc * invkeymat[2][0];y = posa * invkeymat[0][1] + posb * invkeymat[1][1] + posc * invkeymat[2][1];z = posa
-* invkeymat[0][2] + posb * invkeymat[1][2] + posc * invkeymat[2][2];ret[0] = key[(x % 26 < 0) ? (26 + x % 26) : (x % 26)];
-ret[1] = key[(y % 26 < 0) ? (26 + y % 26) : (y % 26)];
-ret[2] = key[(z % 26 < 0) ? (26 + z % 26) : (z % 26)];
-ret[3] = '\0'; return ret;
+
+void getCofactor(int mat[MATRIX_SIZE][MATRIX_SIZE], int temp[MATRIX_SIZE][MATRIX_SIZE], int p, int q, int n) {
+    int i = 0, j = 0;
+    for (int row = 0; row < n; row++) {
+        for (int col = 0; col < n; col++) {
+            if (row != p && col != q) {
+                temp[i][j++] = mat[row][col];
+                if (j == n - 1) {
+                    j = 0;
+                    i++;
+                }
+            }
+        }
+    }
 }
-int main() { char msg[1000];
-char enc[1000] = ""; char dec[1000] = ""; int n;
-strcpy(msg, "SecurityLaboratory"); printf("Simulation of Hill Cipher\n"); printf("Input message : %s\n", msg); for (int i = 0; i < strlen(msg); i++) { msg[i] = toupper(msg[i]);
+
+int determinant(int mat[MATRIX_SIZE][MATRIX_SIZE], int n) {
+    int D = 0;
+    if (n == 1)
+        return mat[0][0];
+
+    int temp[MATRIX_SIZE][MATRIX_SIZE];
+    int sign = 1;
+
+    for (int f = 0; f < n; f++) {
+        getCofactor(mat, temp, 0, f, n);
+        D += sign * mat[0][f] * determinant(temp, n - 1);
+        sign = -sign;
+    }
+
+    return D;
 }
-// Remove spaces
-n = strlen(msg) % 3;
-// Append padding text X if (n != 0) {
-for (int i = 1; i <= (3 - n); i++) {
-strcat(msg, "X");
+
+void adjoint(int mat[MATRIX_SIZE][MATRIX_SIZE], int adj[MATRIX_SIZE][MATRIX_SIZE]) {
+    if (MATRIX_SIZE == 1) {
+        adj[0][0] = 1;
+        return;
+    }
+
+    int sign = 1, temp[MATRIX_SIZE][MATRIX_SIZE];
+
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            getCofactor(mat, temp, i, j, MATRIX_SIZE);
+            sign = ((i + j) % 2 == 0) ? 1 : -1;
+            adj[j][i] = (sign * determinant(temp, MATRIX_SIZE - 1));
+        }
+    }
 }
+
+int modInverse(int a, int m) {
+    a = a % m;
+    for (int x = 1; x < m; x++)
+        if ((a * x) % m == 1)
+            return x;
+    return -1;
 }
-printf("Padded message : %s\n", msg); for (int i = 0; i < strlen(msg); i += 3) { char a = msg[i];
-char b = msg[i + 1]; char c = msg[i + 2];
-strcat(enc, encode(a, b, c));
+
+void inverse(int mat[MATRIX_SIZE][MATRIX_SIZE], int inverse[MATRIX_SIZE][MATRIX_SIZE]) {
+    int det = determinant(mat, MATRIX_SIZE);
+    int invDet = modInverse(det, 26);
+
+    if (invDet == -1) {
+        printf("Inverse doesn't exist, key matrix is not invertible!\n");
+        return;
+    }
+
+    int adj[MATRIX_SIZE][MATRIX_SIZE];
+    adjoint(mat, adj);
+
+    for (int i = 0; i < MATRIX_SIZE; i++)
+        for (int j = 0; j < MATRIX_SIZE; j++)
+            inverse[i][j] = (adj[i][j] * invDet) % 26;
+
+    for (int i = 0; i < MATRIX_SIZE; i++)
+        for (int j = 0; j < MATRIX_SIZE; j++)
+            if (inverse[i][j] < 0)
+                inverse[i][j] += 26;
 }
-printf("Encoded message : %s\n", enc); for (int i = 0; i < strlen(enc); i += 3) { char a = enc[i];
-char b = enc[i + 1]; char c = enc[i + 2];
-strcat(dec, decode(a, b, c));
- 
+
+void multiplyMatrix(int mat1[MATRIX_SIZE][MATRIX_SIZE], int mat2[], int res[]) {
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        res[i] = 0;
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            res[i] += mat1[i][j] * mat2[j];
+        }
+        res[i] = res[i] % 26;
+    }
 }
-printf("Decoded message : %s\n", dec); return 0;
+
+void encrypt(char message[], int keyMatrix[MATRIX_SIZE][MATRIX_SIZE]) {
+    int messageVector[MATRIX_SIZE];
+    int cipherVector[MATRIX_SIZE];
+
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        messageVector[i] = (message[i]) % 65;
+    }
+
+    multiplyMatrix(keyMatrix, messageVector, cipherVector);
+
+    printf("Encrypted text: ");
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        printf("%c", cipherVector[i] + 65);
+    }
+    printf("\n");
 }
+
+void decrypt(char message[], int inverseKeyMatrix[MATRIX_SIZE][MATRIX_SIZE]) {
+    int messageVector[MATRIX_SIZE];
+    int plainVector[MATRIX_SIZE];
+
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        messageVector[i] = (message[i]) % 65;
+    }
+
+    multiplyMatrix(inverseKeyMatrix, messageVector, plainVector);
+
+    printf("Decrypted text: ");
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        printf("%c", plainVector[i] + 65);
+    }
+    printf("\n");
+}
+
+int main() {
+    char message[MATRIX_SIZE + 1];
+    char key[MATRIX_SIZE * MATRIX_SIZE + 1];
+    int keyMatrix[MATRIX_SIZE][MATRIX_SIZE];
+    int inverseKeyMatrix[MATRIX_SIZE][MATRIX_SIZE];
+    int choice;
+
+    printf("Enter the %d-letter key: ", MATRIX_SIZE * MATRIX_SIZE);
+    gets(key);
+
+    getKeyMatrix(key, keyMatrix);
+
+    printf("Enter the %d-letter message: ", MATRIX_SIZE);
+    gets(message);
+
+    printf("Enter 1 to encrypt or 2 to decrypt: ");
+    scanf("%d", &choice);
+
+    if (choice == 1) {
+        encrypt(message, keyMatrix);
+    } else if (choice == 2) {
+        inverse(keyMatrix, inverseKeyMatrix);
+        decrypt(message, inverseKeyMatrix);
+    } else {
+        printf("Invalid choice!\n");
+    }
+
+    return 0;
+}
+```
 
 
 ## OUTPUT:
 OUTPUT:
 Simulating Hill Cipher
 
+![image](https://github.com/user-attachments/assets/1fcc984c-e329-45a2-a476-b854c5881f6b)
 
-Input Message : SecurityLaboratory
-Padded Message : SECURITYLABORATORY Encrypted Message : EACSDKLCAEFQDUKSXU Decrypted Message : SECURITYLABORATORY
 ## RESULT:
 The program is executed successfully
 
@@ -398,44 +560,85 @@ The Vigenere cipher is a method of encrypting alphabetic text by using a series 
 
 ## PROGRAM:
 PROGRAM:
-#include<stdio.h> #include<string.h>
-//FunctiontoperformVigenereencryption voidvigenereEncrypt(char*text,constchar*key){ inttextLen= strlen(text);
-intkeyLen=strlen(key); for(inti =0;i< textLen;i++){ charc =text[i]; if(c>='A'&&c<='Z'){
-//Encryptuppercaseletters
-text[i]=((c-'A'+key[i%keyLen]-'A')%26)+'A';
-}else if(c>='a'&&c<='z'){
-//Encryptlowercaseletters
-text[i]=((c-'a'+key[i%keyLen]-'A')%26)+'a';
-}
-}
-}
-//FunctiontoperformVigeneredecryption voidvigenereDecrypt(char*text,constchar*key){ inttextLen= strlen(text);
-intkeyLen=strlen(key);
+```
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
-for(inti =0;i< textLen;i++){ charc =text[i]; if(c>='A'&&c<='Z'){
-//Decryptuppercaseletters
- 
-text[i]=((c-'A'-(key[i% keyLen]-'A') +26) %26)+ 'A';
-}else if(c>='a'&&c<='z'){
-//Decryptlowercaseletters
-text[i]=((c-'a'-(key[i% keyLen]-'A') +26) %26)+ 'a';
+void generateKey(char str[], char key[]) {
+    int strLen = strlen(str);
+    int keyLen = strlen(key);
+    int i, j;
+
+    for (i = 0, j = 0; i < strLen; i++, j++) {
+        if (j == keyLen)
+            j = 0;
+        key[i] = key[j];
+    }
+    key[i] = '\0';
 }
+
+void encryptDecrypt(char str[], char key[], int mode) {
+    int strLen = strlen(str);
+    char result[strLen];
+
+    for (int i = 0; i < strLen; i++) {
+        if (isalpha(str[i])) {
+            char base = isupper(str[i]) ? 'A' : 'a';
+            if (mode == 1) { 
+                result[i] = (str[i] + key[i] - 2 * base) % 26 + base;
+            } else if (mode == 2) { 
+                result[i] = (str[i] - key[i] + 26) % 26 + base;
+            }
+        } else {
+            result[i] = str[i]; 
+        }
+    }
+
+    result[strLen] = '\0';
+    printf("Result: %s\n", result);
 }
+
+int main() {
+    char str[100], key[100];
+    int choice;
+
+    printf("Enter the text: ");
+    gets(str);
+
+    printf("Enter the key: ");
+    gets(key);
+
+    char originalKey[100];
+    strcpy(originalKey, key);
+
+    generateKey(str, key);
+
+    printf("Enter 1 to encrypt or 2 to decrypt: ");
+    scanf("%d", &choice);
+
+    if (choice == 1) {
+        encryptDecrypt(str, key, 1);  
+    } else if (choice == 2) {
+        encryptDecrypt(str, key, 2);  
+    } else {
+        printf("Invalid choice!\n");
+    }
+
+    return 0;
 }
-intmain(){
-constchar *key="KEY";//Replacewithyourdesired key
-char message[]= "Thisisasecretmessage.";//Replace withyourmessage
-//Encrypt themessage vigenereEncrypt(message,key); printf("EncryptedMessage:%s\n",message);
-//Decrypt themessage backtotheoriginal vigenereDecrypt(message,key); printf("DecryptedMessage:%s\n",message); Return 0;
+```
 
 ## OUTPUT:
 OUTPUT :
 
 Simulating Vigenere Cipher
 
+![image](https://github.com/user-attachments/assets/811d722f-ef42-4869-83e0-2cdc5078441b)
 
-Input Message : SecurityLaboratory
-Encrypted Message : NMIYEMKCNIQVVROWXC Decrypted Message : SECURITYLABORATORY
+![image](https://github.com/user-attachments/assets/1b0f267d-c9e7-4d4a-a71e-6c8f1567a283)
+
+
 ## RESULT:
 The program is executed successfully
 
@@ -467,55 +670,65 @@ In the rail fence cipher, the plaintext is written downwards and diagonally on s
 ## PROGRAM:
 
 PROGRAM:
-#include<stdio.h> #include<string.h> #include<stdlib.h> main()
+
+```
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+main()
 {
-int i,j,len,rails,count,code[100][1000]; char str[1000];
-printf("Enter a Secret Message\n"); gets(str);
-len=strlen(str);
-printf("Enter number of rails\n"); scanf("%d",&rails); for(i=0;i<rails;i++)
+int i,j,len,rails,count,code[100][1000];
+ char str[1000];
+ printf("Enter a Secret Message\n");
+ gets(str);
+ len=strlen(str);
+printf("Enter number of rails\n");
+scanf("%d",&rails);
+for(i=0;i<rails;i++)
 {
-for(j=0;j<len;j++)
-{
-code[i][j]=0;
+ for(j=0;j<len;j++)
+ {
+ code[i][j]=0;
+ }
 }
-}
-count=0; j=0;
+count=0;
+j=0;
 while(j<len)
 {
 if(count%2==0)
 {
 for(i=0;i<rails;i++)
 {
-//strcpy(code[i][j],str[j]);
-code[i][j]=(int)str[j]; j++;
+ //strcpy(code[i][j],str[j]);
+ code[i][j]=(int)str[j]; 
+ j++;
 }
-
 }
 else
 {
- 
 for(i=rails-2;i>0;i--)
 {
-code[i][j]=(int)str[j]; j++;
-}
-}
-
+ code[i][j]=(int)str[j];
+j++;
+} 
+} 
 count++;
 }
-
 for(i=0;i<rails;i++)
 {
 for(j=0;j<len;j++)
 {
-if(code[i][j]!=0) printf("%c",code[i][j]);
+ if(code[i][j]!=0)
+ printf("%c",code[i][j]);
 }
 }
 printf("\n");
 }
+```
 ## OUTPUT:
 OUTPUT:
-Enter a Secret Message wearediscovered
-Enter number of rails 2
-waeicvrderdsoee
+
+![Screenshot 2024-09-02 142437](https://github.com/user-attachments/assets/07d9c517-dd7d-461f-99d2-aa5f63b684ce)
+
 ## RESULT:
 The program is executed successfully
